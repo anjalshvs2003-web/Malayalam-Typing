@@ -1,5 +1,4 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import {
   Keyboard,
   Languages,
@@ -8,13 +7,8 @@ import {
   Sparkles,
   Check,
   Wand2,
-  Mic,
-  Square,
   Copy,
   CheckCheck,
-  AlertCircle,
-  X,
-  Volume2,
 } from 'lucide-react';
 import { InputMode, TransliterationState } from '../transliteration/types';
 import {
@@ -22,7 +16,6 @@ import {
   transliterateParagraph,
 } from '../transliteration/transliterationService';
 import { pasteFromClipboard, copyToClipboard } from '../utils/clipboard';
-import { useVoiceTyping } from '../hooks/useVoiceTyping';
 
 interface ManglishEditorProps {
   text: string;
@@ -38,8 +31,6 @@ export const ManglishEditor: React.FC<ManglishEditorProps> = ({
   setInputMode,
 }) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const textRef = useRef(text);
-  textRef.current = text;
 
   const [suggestionState, setSuggestionState] = useState<TransliterationState>({
     activeWord: '',
@@ -53,66 +44,6 @@ export const ManglishEditor: React.FC<ManglishEditorProps> = ({
 
   const [isTransliteratingAll, setIsTransliteratingAll] = useState(false);
   const [copiedInput, setCopiedInput] = useState(false);
-
-  // Baseline editor text saved when voice typing session starts
-  const baseVoiceTextRef = useRef<string>('');
-
-  // FAST WORD-BY-WORD STREAMING VOICE TYPING HANDLER
-  // Updates editor immediately when a word is spoken
-  const handleLiveVoiceChunk = useCallback(
-    (liveSessionText: string, isFinal: boolean) => {
-      if (!liveSessionText.trim()) return;
-
-      const base = baseVoiceTextRef.current;
-      const combined = base ? `${base} ${liveSessionText.trim()}` : liveSessionText.trim();
-      setText(combined);
-
-      if (isFinal) {
-        baseVoiceTextRef.current = combined;
-      }
-
-      // Auto-scroll textarea down as speech arrives
-      if (textareaRef.current) {
-        textareaRef.current.scrollTop = textareaRef.current.scrollHeight;
-      }
-    },
-    [setText]
-  );
-
-  // Hook for Web Speech API Malayalam voice recognition
-  const {
-    status: voiceStatus,
-    isListening,
-    isSpeaking,
-    isSupported: isVoiceSupported,
-    interimTranscript,
-    errorMessage: voiceError,
-    voiceLang,
-    setVoiceLang,
-    startListening,
-    stopListening,
-    clearError: clearVoiceError,
-  } = useVoiceTyping({
-    onLiveChunk: handleLiveVoiceChunk,
-    lang: 'ml-IN',
-  });
-
-  const handleStartVoice = () => {
-    baseVoiceTextRef.current = textRef.current.trim();
-    startListening();
-  };
-
-  const handleStopVoice = () => {
-    stopListening();
-    // Re-focus cursor at the end of the text
-    setTimeout(() => {
-      if (textareaRef.current) {
-        textareaRef.current.focus();
-        const len = textareaRef.current.value.length;
-        textareaRef.current.setSelectionRange(len, len);
-      }
-    }, 100);
-  };
 
   // Helper to extract the English word currently under the cursor
   const getWordAtCursor = (
@@ -288,7 +219,6 @@ export const ManglishEditor: React.FC<ManglishEditorProps> = ({
 
   const handleClear = () => {
     setText('');
-    baseVoiceTextRef.current = '';
     setSuggestionState((prev) => ({ ...prev, isOpen: false, activeWord: '' }));
     textareaRef.current?.focus();
   };
@@ -296,7 +226,6 @@ export const ManglishEditor: React.FC<ManglishEditorProps> = ({
   const handleLoadSample = () => {
     const sample = 'മലയാളം ഒരു മനോഹരമായ ഭാഷയാണ്. ഇവിടെ നിങ്ങൾക്ക് എളുപ്പത്തിൽ മലയാളം ടൈപ്പ് ചെയ്യാം.';
     setText(sample);
-    baseVoiceTextRef.current = sample;
     textareaRef.current?.focus();
   };
 
@@ -306,7 +235,6 @@ export const ManglishEditor: React.FC<ManglishEditorProps> = ({
     try {
       const result = await transliterateParagraph(text);
       setText(result);
-      baseVoiceTextRef.current = result;
     } finally {
       setIsTransliteratingAll(false);
     }
@@ -337,74 +265,35 @@ export const ManglishEditor: React.FC<ManglishEditorProps> = ({
         {/* Editor Top Bar: Mode Toggle & Action Buttons */}
         <div className="p-4 sm:p-5 border-b border-slate-100 dark:border-slate-800/80 bg-slate-50/70 dark:bg-slate-900/40 backdrop-blur-md flex flex-wrap items-center justify-between gap-3">
           
-          {/* Mode Switch Pills & Voice Typing Primary Trigger */}
-          <div className="flex flex-wrap items-center gap-2">
-            <div className="flex items-center gap-1 p-1 rounded-2xl bg-slate-200/60 dark:bg-slate-800 border border-slate-300/40 dark:border-slate-700/60 text-xs">
-              <button
-                onClick={() => setInputMode('manglish')}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-medium transition-all ${
-                  inputMode === 'manglish'
-                    ? 'bg-brand-blue text-white shadow-sm shadow-brand-blue/30 font-semibold'
-                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-                }`}
-              >
-                <Languages className="w-3.5 h-3.5" />
-                <span>Manglish Typing</span>
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse ml-0.5" />
-              </button>
+          {/* Mode Switch Pills */}
+          <div className="flex items-center gap-1 p-1 rounded-2xl bg-slate-200/60 dark:bg-slate-800 border border-slate-300/40 dark:border-slate-700/60 text-xs">
+            <button
+              onClick={() => setInputMode('manglish')}
+              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl font-medium transition-all ${
+                inputMode === 'manglish'
+                  ? 'bg-brand-blue text-white shadow-sm shadow-brand-blue/30 font-semibold'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+              }`}
+            >
+              <Languages className="w-3.5 h-3.5" />
+              <span>Manglish Typing</span>
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse ml-0.5" />
+            </button>
 
-              <button
-                onClick={() => {
-                  setInputMode('direct');
-                  setSuggestionState((prev) => ({ ...prev, isOpen: false }));
-                }}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-medium transition-all ${
-                  inputMode === 'direct'
-                    ? 'bg-brand-blue text-white shadow-sm shadow-brand-blue/30 font-semibold'
-                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-                }`}
-              >
-                <Keyboard className="w-3.5 h-3.5" />
-                <span>Direct Malayalam</span>
-              </button>
-            </div>
-
-            {/* Malayalam Voice Typing Primary Action */}
-            {isVoiceSupported ? (
-              <button
-                onClick={isListening ? handleStopVoice : handleStartVoice}
-                className={`flex items-center gap-2 px-3.5 py-2 rounded-2xl font-semibold text-xs transition-all border ${
-                  isListening
-                    ? 'bg-rose-500 text-white border-rose-600 shadow-md shadow-rose-500/30'
-                    : 'bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 border-rose-500/20 dark:border-rose-500/30 shadow-sm'
-                }`}
-                title="Malayalam Voice Typing - Speak any word to type it instantly"
-              >
-                {isListening ? (
-                  <>
-                    <Square className="w-3.5 h-3.5 fill-white" />
-                    <span>Stop Voice Typing</span>
-                    <span className="w-2 h-2 rounded-full bg-white animate-ping ml-0.5" />
-                  </>
-                ) : (
-                  <>
-                    <Mic className="w-3.5 h-3.5 text-rose-500 dark:text-rose-400" />
-                    <span>Voice Typing</span>
-                    <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-rose-500/15 text-rose-600 dark:text-rose-400 font-mono">
-                      Fast
-                    </span>
-                  </>
-                )}
-              </button>
-            ) : (
-              <span
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-medium text-slate-400 dark:text-slate-500 bg-slate-100 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-800 cursor-not-allowed"
-                title="Voice typing requires Google Chrome, Microsoft Edge, or Safari"
-              >
-                <Mic className="w-3 h-3 opacity-50" />
-                <span>Voice (Chrome/Safari)</span>
-              </span>
-            )}
+            <button
+              onClick={() => {
+                setInputMode('direct');
+                setSuggestionState((prev) => ({ ...prev, isOpen: false }));
+              }}
+              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl font-medium transition-all ${
+                inputMode === 'direct'
+                  ? 'bg-brand-blue text-white shadow-sm shadow-brand-blue/30 font-semibold'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+              }`}
+            >
+              <Keyboard className="w-3.5 h-3.5" />
+              <span>Direct Malayalam</span>
+            </button>
           </div>
 
           {/* Utility Controls: Sample, Select All, Copy, Paste, Clear */}
@@ -483,7 +372,7 @@ export const ManglishEditor: React.FC<ManglishEditorProps> = ({
           </div>
         </div>
 
-        {/* Clear Instructional Banner (Requirement 1) */}
+        {/* Clear Instructional Banner */}
         <div className="px-6 py-2.5 border-b border-slate-100/80 dark:border-slate-800/60 bg-slate-50/40 dark:bg-slate-900/20 flex flex-wrap items-center justify-between text-xs text-slate-500 dark:text-slate-400 gap-2">
           <div className="flex items-center gap-1.5 font-medium text-slate-700 dark:text-slate-300">
             <Languages className="w-3.5 h-3.5 text-brand-blue" />
@@ -498,125 +387,7 @@ export const ManglishEditor: React.FC<ManglishEditorProps> = ({
           </div>
         </div>
 
-        {/* FAST REAL-TIME VOICE TYPING LIVE BAR */}
-        <AnimatePresence>
-          {isListening && (
-            <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: 'auto', opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              className="border-b border-rose-200/80 dark:border-rose-900/60 bg-gradient-to-r from-rose-500/10 via-rose-500/5 to-transparent px-6 py-3 flex flex-wrap items-center justify-between gap-3"
-            >
-              <div className="flex items-center space-x-3.5">
-                {/* Real-time Animated Soundwave Visualizer */}
-                <div className="flex items-center gap-1 h-5 px-1">
-                  {[40, 90, 60, 100, 50].map((h, i) => (
-                    <motion.span
-                      key={i}
-                      animate={{
-                        scaleY: isSpeaking ? [0.25, h / 100, 0.35] : 0.25,
-                      }}
-                      transition={{
-                        repeat: Infinity,
-                        duration: 0.35 + i * 0.08,
-                        ease: 'easeInOut',
-                      }}
-                      className="w-1 bg-rose-500 rounded-full origin-bottom h-full"
-                    />
-                  ))}
-                </div>
-
-                <div className="space-y-0.5">
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-bold text-rose-600 dark:text-rose-400 tracking-wide uppercase font-mono flex items-center gap-1.5">
-                      {isSpeaking ? (
-                        <>
-                          <Volume2 className="w-3.5 h-3.5 text-rose-500 animate-pulse" />
-                          <span>Speaking... Typing Live</span>
-                        </>
-                      ) : voiceStatus === 'processing' ? (
-                        <span>Converting speech...</span>
-                      ) : (
-                        <span>Listening... Speak any Malayalam word</span>
-                      )}
-                    </span>
-
-                    {/* Language Engine Switcher */}
-                    <div className="flex items-center gap-1 bg-white/80 dark:bg-slate-800 p-0.5 rounded-lg border border-slate-200 dark:border-slate-700 text-[10px] ml-1">
-                      <button
-                        onClick={() => setVoiceLang('ml-IN')}
-                        className={`px-2 py-0.5 rounded-md font-medium transition-all ${
-                          voiceLang === 'ml-IN'
-                            ? 'bg-rose-500 text-white font-bold'
-                            : 'text-slate-600 dark:text-slate-300 hover:text-black dark:hover:text-white'
-                        }`}
-                        title="Native Malayalam speech model (ml-IN)"
-                      >
-                        മലയാളം
-                      </button>
-                      <button
-                        onClick={() => setVoiceLang('en-IN')}
-                        className={`px-2 py-0.5 rounded-md font-medium transition-all ${
-                          voiceLang === 'en-IN'
-                            ? 'bg-rose-500 text-white font-bold'
-                            : 'text-slate-600 dark:text-slate-300 hover:text-black dark:hover:text-white'
-                        }`}
-                        title="Phonetic Manglish voice model (speak phonetically)"
-                      >
-                        Manglish
-                      </button>
-                    </div>
-                  </div>
-
-                  <p className="text-xs text-slate-500 dark:text-slate-400">
-                    {interimTranscript ? (
-                      <span className="font-malayalam text-slate-900 dark:text-white font-medium">
-                        Live stream: "{interimTranscript}"
-                      </span>
-                    ) : (
-                      'Speak one word or full sentences — text appears live in the editor as you speak.'
-                    )}
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={handleStopVoice}
-                  className="px-3 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold flex items-center gap-1.5 shadow-sm transition-all"
-                >
-                  <Square className="w-3 h-3 fill-white" />
-                  <span>Done / Stop</span>
-                </button>
-              </div>
-            </motion.div>
-          )}
-
-          {/* Voice Typing Error Notification */}
-          {voiceError && (
-            <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: 'auto', opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              className="border-b border-amber-200 dark:border-amber-900/50 bg-amber-500/10 px-6 py-2.5 flex items-center justify-between text-xs text-amber-700 dark:text-amber-300"
-            >
-              <div className="flex items-center gap-2">
-                <AlertCircle className="w-4 h-4 text-amber-500 shrink-0" />
-                <span>{voiceError}</span>
-              </div>
-              <button
-                onClick={clearVoiceError}
-                className="p-1 rounded-lg hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 transition-colors"
-                title="Dismiss"
-              >
-                <X className="w-3.5 h-3.5" />
-              </button>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* Main Textarea Area with Universal Placeholders (Requirement 1 & 2) */}
+        {/* Main Textarea Area with Universal Placeholders */}
         <div className="relative p-6 sm:p-8 min-h-[280px] sm:min-h-[340px] flex flex-col">
           <textarea
             ref={textareaRef}
@@ -624,7 +395,6 @@ export const ManglishEditor: React.FC<ManglishEditorProps> = ({
             onChange={(e) => {
               const val = e.target.value;
               setText(val);
-              baseVoiceTextRef.current = val.trim();
               checkCursorWord(val, e.target.selectionStart);
             }}
             onKeyDown={handleKeyDown}
@@ -682,12 +452,7 @@ export const ManglishEditor: React.FC<ManglishEditorProps> = ({
           </div>
 
           <div className="text-[11px] text-slate-400 flex items-center gap-2">
-            {isListening ? (
-              <span className="text-rose-500 font-semibold flex items-center gap-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-ping" />
-                Live Voice Stream Active (Speak single words or full sentences)
-              </span>
-            ) : inputMode === 'manglish' ? (
+            {inputMode === 'manglish' ? (
               <span>Phonetic Mode: Press SPACE after each word to convert</span>
             ) : (
               <span>Direct Unicode Malayalam Mode</span>

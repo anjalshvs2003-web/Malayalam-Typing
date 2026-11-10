@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Sparkles, Zap, Mic } from 'lucide-react';
+import { Sparkles, Zap, Layers } from 'lucide-react';
 
 const FEATURES = [
   {
@@ -18,11 +18,11 @@ const FEATURES = [
     badge: '1-Click Flow',
   },
   {
-    icon: Mic,
-    title: 'Voice & Manglish Typing',
+    icon: Layers,
+    title: 'Multiple Font Formats',
     description:
-      'Write Malayalam naturally using phonetic English letters (Manglish) or speak directly with real-time Malayalam Voice Typing (ml-IN).',
-    badge: 'Dual Input',
+      'Supports FML (Manorama / Panchami), ML-TT (Karthika / Revathi), and standard Unicode with real-time phonetic Manglish typing.',
+    badge: 'Universal Formats',
   },
 ];
 
