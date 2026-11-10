@@ -42,7 +42,7 @@ export const Hero: React.FC = () => {
           transition={{ duration: 0.6, delay: 0.2 }}
           className="text-base sm:text-lg text-slate-600 dark:text-slate-300 max-w-xl mx-auto leading-relaxed font-normal"
         >
-          Type phonetically using English letters. Convert instantly into FML, ML-TT, or clean Unicode.
+          Type in Manglish, speak with Voice Typing, or paste Malayalam. Convert instantly into FML, ML-TT, or clean Unicode.
         </motion.p>
 
       </div>

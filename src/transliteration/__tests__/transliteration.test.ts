@@ -17,7 +17,7 @@ const testPairs: Array<[string, string]> = [
   ['sneham', 'സ്നേഹം'],
   ['keralam', 'കേരളം'],
   ['nanni', 'നന്ദി'],
-  ['anjalsh', 'അഞ്ജൽഷ്'],
+  ['namaskaram', 'നമസ്കാരം'],
 ];
 
 let total = 0;
@@ -39,8 +39,8 @@ for (const [english, expectedMalayalam] of testPairs) {
 console.log('\n--- 2. Testing Sentence Transliteration ---');
 async function testSentence() {
   total++;
-  const inputSentence = 'ente peru anjalsh aanu';
-  const expectedSentence = 'എന്റെ പേര് അഞ്ജൽഷ് ആണ്';
+  const inputSentence = 'malayalam oru manoharamaaya bhashayaanu';
+  const expectedSentence = 'മലയാളം ഒരു മനോഹരമായ ഭാഷയാണ്';
   const result = await transliterateParagraph(inputSentence);
   const ok = result.trim() === expectedSentence.trim();
   if (ok) {

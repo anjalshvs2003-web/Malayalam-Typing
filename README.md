@@ -8,8 +8,8 @@
 ## 🌟 Two Core Functions
 
 1. **English-to-Malayalam Phonetic Transliteration (Manglish Typing)**:
-   - Type naturally using English letters (e.g., `ente peru anjalsh aanu`).
-   - Automatically renders live Malayalam Unicode (`എന്റെ പേര് അഞ്ജൽഷ് ആണ്`).
+   - Type naturally using English letters (e.g., `malayalam oru manoharamaaya bhashayaanu`).
+   - Automatically renders live Malayalam Unicode (`മലയാളം ഒരു മനോഹരമായ ഭാഷയാണ്`).
    - Features lightweight context-aware suggestion popups (Press Space, Enter, or 1–5 to select).
    - Instant toggle between **Manglish Typing** and **Direct Malayalam** input modes.
    - Built with a hybrid engine: online Google Input Tools API with instant offline rule-based fallback.
@@ -28,10 +28,10 @@
 ## 🚀 Quick Workflow
 
 ```
-[ Type in English ] ──> ente peru anjalsh aanu
+[ Type in English ] ──> malayalam oru manoharamaaya bhashayaanu
          │
          ▼
-[ Live Malayalam  ] ──> എന്റെ പേര് അഞ്ജൽഷ് ആണ്
+[ Live Malayalam  ] ──> മലയാളം ഒരു മനോഹരമായ ഭാഷയാണ്
          │
          ▼
 [ Choose Format   ] ──> [ Convert to FML ]  [ Convert to ML-TT ]  [ Unicode ]
@@ -62,8 +62,8 @@ npm test
 - `sneham` ➔ `സ്നേഹം`
 - `keralam` ➔ `കേരളം`
 - `nanni` ➔ `നന്ദി`
-- `anjalsh` ➔ `അഞ്ജൽഷ്`
-- `ente peru anjalsh aanu` ➔ `എന്റെ പേര് അഞ്ജൽഷ് ആണ്`
+- `namaskaram` ➔ `നമസ്കാരം`
+- `malayalam oru manoharamaaya bhashayaanu` ➔ `മലയാളം ഒരു മനോഹരമായ ഭാഷയാണ്`
 - 100% Roundtrip accuracy across ML-TT Karthika, ML-TT Revathi, ML-TT Ambili, ML-TT Nandini, FML Manorama, and FML Panchari.
 
 ---

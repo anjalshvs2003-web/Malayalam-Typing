@@ -5,10 +5,10 @@ const candidateCache = new Map<string, string[]>();
 
 // Priority overrides for canonical words requested by user
 const CANONICAL_OVERRIDES: Record<string, string> = {
-  anjalsh: 'അഞ്ജൽഷ്',
   ente: 'എന്റെ',
   peru: 'പേര്',
   aanu: 'ആണ്',
+  namaskaram: 'നമസ്കാരം',
   njan: 'ഞാൻ',
   ningal: 'നിങ്ങൾ',
   nanni: 'നന്ദി',

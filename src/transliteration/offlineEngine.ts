@@ -18,7 +18,6 @@ const COMMON_DICTIONARY: Record<string, string[]> = {
   sneham: ['സ്നേഹം'],
   keralam: ['കേരളം'],
   nanni: ['നന്ദി', 'നന്നി'],
-  anjalsh: ['അഞ്ജൽഷ്', 'അഞ്ചൽഷ്'],
   namaskaram: ['നമസ്കാരം'],
   engane: ['എങ്ങനെ'],
   evide: ['എവിടെ'],
